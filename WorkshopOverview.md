@@ -1,8 +1,3 @@
----
-output:
-  word_document: default
-  html_document: default
----
 # Bayesian statistics in Sustainability Science, with a focus on Agrarian Societies and Ecosystem Services in the Lake Chad Basin
 
 ## Description
