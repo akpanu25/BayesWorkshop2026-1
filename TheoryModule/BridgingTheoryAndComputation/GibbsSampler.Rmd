@@ -47,8 +47,8 @@ collect_data <- function(
 
   if (!is.null(seed)) set.seed(seed)
   
-  x <- as.numeric(scale(rnorm(N, mean = 0, sd = 1),center=TRUE, scale=TRUE))
-
+  #x <- as.numeric(scale(rnorm(N, mean = 0, sd = 1),center=TRUE, scale=TRUE))
+  x <- rnorm(N, mean = 0, sd = 1)
   y <- beta_0 +
        beta_1 * x +
        rnorm(N, 0, 1 / sqrt(tau))
@@ -335,8 +335,8 @@ If you have run all the code until here, your R environment should contain vecto
 init <- list("beta_0" = 0, "beta_1" = 0, "tau" = 1)
 
 # set hyperparameters
-hyper <- list("mu_0" = 0,"tau_0" = 0.25, # beta_0
-              "mu_1" = 0, "tau_1" = 0.25, # beta_1
+hyper <- list("mu_0" = 0,"tau_0" = 0.5, # beta_0
+              "mu_1" = 0, "tau_1" = 0.5, # beta_1
               "a" = 0.001, "b" = 0.001 # tau
               )
 n_runs = 1000
@@ -362,7 +362,7 @@ posterior_df <- as.data.frame(posterior_sample) |>
     values_to = "value"
   )
 
-
+draw_traceplots <- function(posterior_df, truepars){
 ggplot(posterior_df, aes(x = iter, y = value)) +
   geom_line(alpha = 0.6) +
   geom_hline(
@@ -378,7 +378,29 @@ ggplot(posterior_df, aes(x = iter, y = value)) +
     title = "Gibbs sampler trace plots"
   ) +
   theme_minimal()
+}
 
+print(draw_traceplots(posterior_df= posterior_df, truepars= truepars))
+
+```
+
+## Compare with frequentist estimates
+
+```{r trace plot with mle estimates}
+freqmod <- lm(yobs ~ xobs, data = obsdata)
+freqb0 <- coef(freqmod)[1]
+freqb1 <- coef(freqmod)[2]
+freqsigma <- summary(freqmod)$sigma
+freqtau <- 1/(freqsigma^2)
+
+freqpars <- data.frame(parameter = c("beta_0", "beta_1", "tau"),
+                       value = c(freqb0, freqb1, freqtau))
+
+print(draw_traceplots(posterior_df = posterior_df , truepars = truepars) +
+        geom_hline(data = freqpars, aes(yintercept = value),
+    color = "blue",
+    linetype = "dashed"
+  ))
 
 ```
 
@@ -399,17 +421,17 @@ Go to the code chunks where we visualize prior distributions for the slope, inte
 
 Try running the model with stronger priors (based on what you tested out in exercise 2). Compare the trace plot to the model you ran with weak priors. 
 
-
 ### 4. Play with the sample size.
 
 Use the collect_data function above to generate a data set with a larger or smaller sample size. Then, run the gibbs sampler with the new dataset. Pay special attention to how this affects the posterior estimate for the precision. 
 
 ### 5. Play with the "true" parameters.
 
-Use the collect_data function above to generate a dataset with different properties. For example, a lower value for the precision (tau) means greater scatter around the regression line. A lower value of the slope (beta_1) means a less steep regression line. Compare the trace plots to see how these changes affect the posterior estimates from your Gibbs sampler.  
+Use the collect_data function above to generate a dataset with different properties. For example, a lower value for the precision (tau) means greater scatter around the regression line. A lower value of the slope (beta_1) means a less steep regression line. Compare the trace plots to see how these changes affect the posterior estimates from your Gibbs sampler. 
 
-)
 
 ### 6. Play with the starting values.
 
 Try setting the starting values at something ridiculous and see what happens with your trace plots.
+
+
