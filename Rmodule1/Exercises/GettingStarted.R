@@ -1,3 +1,4 @@
+# This R script is for learning
 # This is an R script, where we can save our code, 
 # run code line-by-line, or run the entire script
 
